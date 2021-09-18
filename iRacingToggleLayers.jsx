@@ -4,8 +4,12 @@
 </javascriptresource>
 #target photoshop
 
-// var wecButton;
-// var imsaButton;
+const FN_CustomSpecMap = "Custom Spec Map"; 					// folder name for "Custom Spec Map"
+const FN_CSM_RedChannelMetallic = "Red Channel Metallic";		// folder name for "Custom Spec Map\Red Channel Metallic"
+const FN_CSM_GreenChannelRoughness = "Green Channel Roughness";	// folder name for "Custom Spec Map\Green Channel Roughness"
+const FN_PaintableArea = "Paintable Area";						// folder name for "Paintable Area"
+const FN_Stickers = "Stickers";									// folder name for stickers and logos
+const FN_Series = "Series";										// folder name for series inside stickers folder
 
 doc = app.activeDocument;
 
@@ -13,30 +17,28 @@ var dlg = new Window( "dialog", "Decals Toggle" );
 var btnPnl = dlg.add( "panel", undefined, "Decals" );
 
 // base folders: paintable area, custom spec map
-var PA_folder = doc.layers["Paintable Area"];
-var CSM_folder = doc.layers["Custom Spec Map"];
+var PA_folder = doc.layers[FN_PaintableArea];
+var CSM_folder = doc.layers[FN_CustomSpecMap];
 
 // custom spec map folders: red channel metallic, green channel roughness
-var CSM_RCM_folder = findFolder(CSM_folder, "Red Channel Metallic");
-var CSM_GCR_folder = findFolder(CSM_folder, "Green Channel Roughness");
+var CSM_RCM_folder = findFolder(CSM_folder, FN_CSM_RedChannelMetallic);
+var CSM_GCR_folder = findFolder(CSM_folder, FN_CSM_GreenChannelRoughness);
 
 // stickers folders: paintable area, red channel metallic, green channel roughness
-var PA_stickersFolder = findFolder(PA_folder, "Stickers");
-var CSM_RCM_stickersFolder = findFolder(CSM_RCM_folder, "Stickers");
-var CSM_GCR_stickersFolder = findFolder(CSM_GCR_folder, "Stickers");
+var PA_stickersFolder = findFolder(PA_folder, FN_Stickers);
+var CSM_RCM_stickersFolder = findFolder(CSM_RCM_folder, FN_Stickers);
+var CSM_GCR_stickersFolder = findFolder(CSM_GCR_folder, FN_Stickers);
 
 // individual series folders; paintable area, red channel metallic, green channel roughness
-var PA_seriesFolder = findFolder(PA_stickersFolder, "Series");
-var CSM_RCM_seriesFolder = findFolder(CSM_RCM_stickersFolder, "Series");
-var CSM_GCR_seriesFolder = findFolder(CSM_GCR_stickersFolder, "Series");
+var PA_seriesFolder = findFolder(PA_stickersFolder, FN_Series);
+var CSM_RCM_seriesFolder = findFolder(CSM_RCM_stickersFolder, FN_Series);
+var CSM_GCR_seriesFolder = findFolder(CSM_GCR_stickersFolder, FN_Series);
 
 var PA_series = [];
 var CSM_RCM_series = [];
 var CSM_GCR_series = [];
 
 PA_series = getAllChildrenFolders(PA_seriesFolder, PA_series);
-CSM_RCM_series = getAllChildrenFolders(CSM_RCM_seriesFolder, CSM_RCM_series);
-CSM_GCR_series = getAllChildrenFolders(CSM_GCR_seriesFolder, CSM_GCR_series);
 
 for(var i = 0; i < PA_series.length; i++){
 	var seriesButton = btnPnl.add("button", undefined, PA_series[i].name);
@@ -47,35 +49,18 @@ for(var i = 0; i < PA_series.length; i++){
 		PA_series = getAllChildrenFolders(PA_seriesFolder, PA_series);
 
 		CSM_RCM_series = [];
-		CSM_RCM_series = getAllChildrenFolders(CSM_RCM_seriesFolder, CSM_RCM_series);
+		CSM_RCM_series = getAllChildren(CSM_RCM_seriesFolder, CSM_RCM_series);
 
 		CSM_GCR_series = [];
-		CSM_GCR_series = getAllChildrenFolders(CSM_GCR_seriesFolder, CSM_GCR_series);
+		CSM_GCR_series = getAllChildren(CSM_GCR_seriesFolder, CSM_GCR_series);
 
-		// show/hide Paintable Area series stickers folders
-		for(var i = 0; i < PA_series.length; i++){
-			if(PA_series[i].name.toUpperCase() !== this.text.toUpperCase()){
-				PA_series[i].visible = false;
-			} else {
-				PA_series[i].visible = true;
-			}
-		}
+		var layersToManipulate = [].concat(PA_series, CSM_RCM_series, CSM_GCR_series);
 
-		// show/hide Custom Spec Map - Red Channel Metallic stickers folders
-		for(var i = 0; i < PA_series.length; i++){
-			if(CSM_RCM_series[i].name.toUpperCase() !== this.text.toUpperCase()){
-				CSM_RCM_series[i].visible = false;
+		for(var i = 0; i < layersToManipulate.length; i++){
+			if(layersToManipulate[i].name.toUpperCase() !== this.text.toUpperCase()){
+				layersToManipulate[i].visible = false;
 			} else {
-				CSM_RCM_series[i].visible = true;
-			}
-		}
-
-		// show/hide Custom Spec Map - Green Channel Roughness stickers folders
-		for(var i = 0; i < PA_series.length; i++){
-			if(CSM_GCR_series[i].name.toUpperCase() !== this.text.toUpperCase()){
-				CSM_GCR_series[i].visible = false;
-			} else {
-				CSM_GCR_series[i].visible = true;
+				layersToManipulate[i].visible = true;
 			}
 		}
 
@@ -86,7 +71,6 @@ for(var i = 0; i < PA_series.length; i++){
 cancelBtn = btnPnl.add( "button", undefined, "Cancel", { name: "cancel" } );
 
 dlg.show();
-
 
 // Function: find a singular folder
 function findFolder(parent, findName){
@@ -111,6 +95,15 @@ function getAllChildrenFolders(parent, list){
 		if(currentFolder.typename === "LayerSet"){
 			list.push(currentFolder);
 		}
+	}
+
+	return list;
+}
+
+// Function: returns a list of all children of parent, one layer deep
+function getAllChildren(parent, list){
+	for(var i = 0; i < parent.layers.length; i++){
+		list.push(parent.layers[i]);
 	}
 
 	return list;
