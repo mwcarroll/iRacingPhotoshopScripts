@@ -4,12 +4,12 @@
 </javascriptresource>
 #target photoshop
 
-const FN_CustomSpecMap = "Custom Spec Map"; 					// folder name for "Custom Spec Map"
-const FN_CSM_RedChannelMetallic = "Red Channel Metallic";		// folder name for "Custom Spec Map\Red Channel Metallic"
-const FN_CSM_GreenChannelRoughness = "Green Channel Roughness";	// folder name for "Custom Spec Map\Green Channel Roughness"
-const FN_PaintableArea = "Paintable Area";						// folder name for "Paintable Area"
-const FN_Stickers = "Stickers";									// folder name for stickers and logos
-const FN_Series = "Series";										// folder name for series inside stickers folder
+const FN_CustomSpecMap = "Custom Spec Map";                     // folder name for "Custom Spec Map"
+const FN_CSM_RedChannelMetallic = "Red Channel Metallic";       // folder name for "Custom Spec Map\Red Channel Metallic"
+const FN_CSM_GreenChannelRoughness = "Green Channel Roughness"; // folder name for "Custom Spec Map\Green Channel Roughness"
+const FN_PaintableArea = "Paintable Area";                      // folder name for "Paintable Area"
+const FN_Stickers = "Stickers";                                 // folder name for stickers and logos
+const FN_Series = "Series";                                     // folder name for series inside stickers folder
 
 doc = app.activeDocument;
 
