@@ -4,6 +4,18 @@
 </javascriptresource>
 #target photoshop
 
+const FN_CustomSpecMap = "Custom Spec Map";                     // folder name for "Custom Spec Map"
+const FN_CSM_RedChannelMetallic = "Red Channel Metallic";       // folder name for "Custom Spec Map\Red Channel Metallic"
+const FN_CSM_GreenChannelRoughness = "Green Channel Roughness"; // folder name for "Custom Spec Map\Green Channel Roughness"
+
+var color_RedChannelMetallic = new HSBColor();
+color_RedChannelMetallic.hue = 0;
+color_RedChannelMetallic.saturation = 0;
+
+var color_GreenChannelRoughness = new HSBColor();
+color_GreenChannelRoughness.hue = 0;
+color_GreenChannelRoughness.saturation = 0;
+
 function cTID(s) { return app.charIDToTypeID(s); };
 function sTID(s) { return app.stringIDToTypeID(s); };
 
@@ -13,10 +25,87 @@ var selectedLayersIdxs = getSelectedLayersIdx();
 
 selectedLayersIdxs = cleanUpIdxs(selectedLayersIdxs).sort();
 
-clearSelection();
+clearSelection(selectedLayersIdxs);
 addToSelectionByIdxs(selectedLayersIdxs);
 
-function clearSelection() {
+var dlg = new Window('dialog', 'Add Current Layer/Group to Spec Map');
+
+//Add Red panel
+dlg.RedPanel = dlg.add("panel", undefined, "Metallic");
+dlg.RedPanel.alignChildren = "right";
+dlg.RedPanel.orientation = 'row';
+dlg.RedPanel.sliderRed = dlg.RedPanel.add('scrollbar', undefined, 50.0, 0, 100);
+dlg.RedPanel.sliderRed.preferredSize = [100,20];
+dlg.RedPanel.RedValue = dlg.RedPanel.add('edittext');
+dlg.RedPanel.RedValue.preferredSize = [50,25];
+dlg.RedPanel.RedValue.onChange = function (){
+   if (!isNaN(dlg.RedPanel.RedValue.value)){
+      alert("Metallic value is not a valid number", dlg.RedPanel.RedValue.value);}
+}
+dlg.RedPanel.RedPercent = dlg.RedPanel.add('statictext');
+dlg.RedPanel.RedPercent.text = "%";
+dlg.RedPanel.RedValue.text = Math.round(dlg.RedPanel.sliderRed.value * 10)/10;
+dlg.RedPanel.sliderRed.onChanging = function () {
+    dlg.RedPanel.RedValue.text = Math.round(dlg.RedPanel.sliderRed.value * 10)/10;
+
+    color_RedChannelMetallic.brightness = Math.round(dlg.RedPanel.sliderRed.value * 10)/10;
+}
+
+//Add Green panel
+dlg.GreenPanel = dlg.add("panel", undefined, "Roughness");
+dlg.GreenPanel.alignChildren = "right";
+dlg.GreenPanel.orientation = 'row';
+dlg.GreenPanel.sliderGreen = dlg.GreenPanel.add('scrollbar', undefined, 50.0, 0, 100);
+dlg.GreenPanel.sliderGreen.preferredSize = [100,20];
+dlg.GreenPanel.GreenValue = dlg.GreenPanel.add('edittext');
+dlg.GreenPanel.GreenValue.preferredSize = [50,25];
+dlg.GreenPanel.GreenValue.onChange = function (){
+   if (isNaN(dlg.GreenPanel.GreenValue.value)){
+      alert("Roughness value is not a valid number", dlg.GreenPanel.GreenValue.value);}
+}
+dlg.GreenPanel.GreenPercent = dlg.GreenPanel.add('statictext');
+dlg.GreenPanel.GreenPercent.text = "%";
+dlg.GreenPanel.GreenValue.text = Math.round(dlg.GreenPanel.sliderGreen.value * 10)/10;
+dlg.GreenPanel.GreenValue.text.onChanging = function(){
+    dlg.GreenPanel.sliderGreen.value = dlg.GreenPanel.GreenValue.text;
+}
+dlg.GreenPanel.sliderGreen.onChanging = function () {
+    dlg.GreenPanel.GreenValue.text = Math.round(dlg.GreenPanel.sliderGreen.value * 10)/10;
+
+    color_GreenChannelRoughness.brightness = Math.round(dlg.GreenPanel.sliderGreen.value * 10)/10;
+}
+
+dlg.btnRun = dlg.add("button", undefined, "Run");
+dlg.btnRun.onClick = function() {
+    color_RedChannelMetallic.brightness = Math.round(dlg.RedPanel.sliderRed.value * 10)/10;
+    color_GreenChannelRoughness.brightness = Math.round(dlg.GreenPanel.sliderGreen.value * 10)/10;
+
+    var customSpecMapLayerSet = app.activeDocument.layerSets[FN_CustomSpecMap];
+    var redChannelMetallicLayerSet = customSpecMapLayerSet.layerSets.getByName(FN_CSM_RedChannelMetallic);
+    var greenChannelRoughnessLayerSet = customSpecMapLayerSet.layerSets.getByName(FN_CSM_GreenChannelRoughness);
+
+    var newRedChannelLayer = redChannelMetallicLayerSet.artLayers.add();
+    app.activeDocument.activeLayer = newRedChannelLayer;
+    app.activeDocument.selection.fill(color_RedChannelMetallic);   
+
+    var newGreenChannelLayer = greenChannelRoughnessLayerSet.artLayers.add();
+    app.activeDocument.activeLayer = newGreenChannelLayer;
+    app.activeDocument.selection.fill(color_GreenChannelRoughness);   
+
+    app.activeDocument.selection.deselect();
+    this.parent.close(0);
+}
+
+dlg.btnCancel = dlg.add("button", undefined, "Cancel");
+dlg.btnCancel.onClick = function() { 
+    app.activeDocument.selection.deselect();
+    this.parent.close(0);
+}
+
+dlg.show();
+
+
+function clearSelection(selectedLayersIdxs) {
     var dialogMode = DialogModes.NO;
     var desc1 = new ActionDescriptor();
     var ref1 = new ActionReference();
@@ -24,6 +113,7 @@ function clearSelection() {
     desc1.putReference(cTID('null'), ref1);
     var ref2 = new ActionReference();
     ref2.putEnumerated(cTID('Chnl'), cTID('Chnl'), cTID('Trsp'));
+    ref2.putIndex(cTID('Lyr '), selectedLayersIdxs[selectedLayersIdxs.length - 1])
     desc1.putReference(cTID('T   '), ref2);
     executeAction(cTID('setd'), desc1, dialogMode);
 }
@@ -32,7 +122,7 @@ function addToSelectionByIdx(idx) {
     var dialogMode = DialogModes.NO;
     var desc1 = new ActionDescriptor();
     var ref1 = new ActionReference();
-    ref1.putEnumerated(cTID('channel'), cTID('channel'), cTID('transparency'));
+    ref1.putEnumerated(sTID('channel'), sTID('channel'), sTID('transparencyEnum'));
     ref1.putIndex(cTID('Lyr '), idx);
     desc1.putReference(cTID('null'), ref1);
     var ref2 = new ActionReference();
@@ -87,62 +177,61 @@ function getSelectedLayersIdx(){
 function cleanUpIdxs(idxs){
     var returnIdxs = [];
 
-    var layersetIdxs = [];
-    getLayersetIdxs(app.activeDocument.layers, layersetIdxs);
+    var allLayerSets = [];
+    getLayerSets(app.activeDocument.layers, allLayerSets);
 
     for(var i = 0; i < idxs.length; i++){
-        if(indexOf(layersetIdxs, idxs[i]) === -1) returnIdxs.push(idxs[i]);
-        else {
+        if(isItemIndexInArray(allLayerSets, idxs[i])){
+            // add its children to array
+            var foundLayerSet = findItemByIdxInArray(allLayerSets, idxs[i]);
+
             var childrenIdxs = [];
 
-            var foundLayerSet = findLayerSetByIdx(app.activeDocument.layerSets, idxs[i]);
-            getAllChildrenArtLayerIdxs(foundLayerSet, childrenIdxs);
+            getAllChildrenArtLayerIdxs(foundLayerSet.layers, childrenIdxs);
+
             returnIdxs = [].concat(returnIdxs, childrenIdxs);
+        } else {
+            returnIdxs.push(idxs[i]);
         }
     }
+    
 
     return returnIdxs;
 }
 
-function getLayersetIdxs(layersToSearch, layersetIdxs){
+function getLayerSets(layersToSearch, layerSets){
     for(var i = 0; i < layersToSearch.length; i++){
         if(layersToSearch[i].typename === "LayerSet"){
-            layersetIdxs.push(layersToSearch[i].itemIndex);
-            getLayersetIdxs(layersToSearch[i].layers, layersetIdxs);
+            layerSets.push(layersToSearch[i]);
+            getLayerSets(layersToSearch[i].layers, layerSets);
         }
     }
 
-    return layersetIdxs;
+    return layerSets;
 }
 
-function getAllChildrenArtLayerIdxs(parent, childrenIdxs){
-    for(var i = 0; i < parent.layers.length; i++){
-        if(parent.layers[i].typename === "LayerSet"){
-            getAllChildrenArtLayerIdxs(parent.layers[i].layers, childrenIdxs);
+function getAllChildrenArtLayerIdxs(layersToSearch, childrenIdxs){
+    for(var i = 0; i < layersToSearch.length; i++){
+        if(layersToSearch[i].typename === "LayerSet"){
+            getAllChildrenArtLayerIdxs(layersToSearch[i].layers, childrenIdxs);
         } else {
-            childrenIdxs.push(parent.layers[i].itemIndex);
-        }
-    }
-
-
-    return childrenIdxs;
-}
-
-function findLayerSetByIdx(layerSets, idx){
-    for(var i = 0; i < layerSets.length; i++) {
-        if(layerSets[i].itemIndex === idx) return layerSets[i];
-        else {
-            if(layerSets[i].typename === "LayerSet") findLayersetByIdx(layerSets[i].layerSets, idx);
+            childrenIdxs.push(layersToSearch[i].itemIndex);
         }
     }
 }
 
-function indexOf(array, target) {
-    for (var i=0; i < array.length; i++) {
-        if (array[i] === target) {
-            return i;
-        }
+function findItemByIdxInArray(array, idx){
+    for(var i = 0; i < array.length; i++){
+        if(array[i].itemIndex === idx) return array[i];
     }
-    // item was not found
-    return -1;
+
+    return undefined;
+}
+
+function isItemIndexInArray(array, idx){
+    for(var i = 0; i < array.length; i++){
+        if(array[i].itemIndex === idx) return true;
+    }
+
+    return false;
 }
