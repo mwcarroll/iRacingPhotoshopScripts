@@ -7,6 +7,7 @@
 const FN_CustomSpecMap = "Custom Spec Map";                     // folder name for "Custom Spec Map"
 const FN_CSM_RedChannelMetallic = "Red Channel Metallic";       // folder name for "Custom Spec Map\Red Channel Metallic"
 const FN_CSM_GreenChannelRoughness = "Green Channel Roughness"; // folder name for "Custom Spec Map\Green Channel Roughness"
+const FN_CSM_BlueChannelClearcoat = "Blue Channel Clearcoat";   // folder name for "Custom Spec Map\Blue Channel Clearcoat"
 
 var color_RedChannelMetallic = new HSBColor();
 color_RedChannelMetallic.hue = 0;
@@ -75,14 +76,40 @@ dlg.GreenPanel.sliderGreen.onChanging = function () {
     color_GreenChannelRoughness.brightness = Math.round(dlg.GreenPanel.sliderGreen.value * 10)/10;
 }
 
+//Add Blue panel
+dlg.BluePanel = dlg.add("panel", undefined, "Roughness");
+dlg.BluePanel.alignChildren = "right";
+dlg.BluePanel.orientation = 'row';
+dlg.BluePanel.sliderBlue = dlg.BluePanel.add('scrollbar', undefined, 50.0, 0, 100);
+dlg.BluePanel.sliderBlue.preferredSize = [100,20];
+dlg.BluePanel.BlueValue = dlg.BluePanel.add('edittext');
+dlg.BluePanel.BlueValue.preferredSize = [50,25];
+dlg.BluePanel.BlueValue.onChange = function (){
+   if (isNaN(dlg.BluePanel.BlueValue.value)){
+      alert("Roughness value is not a valid number", dlg.BluePanel.BlueValue.value);}
+}
+dlg.BluePanel.BluePercent = dlg.BluePanel.add('statictext');
+dlg.BluePanel.BluePercent.text = "%";
+dlg.BluePanel.BlueValue.text = Math.round(dlg.BluePanel.sliderBlue.value * 10)/10;
+dlg.BluePanel.BlueValue.text.onChanging = function(){
+    dlg.BluePanel.sliderBlue.value = dlg.BluePanel.BlueValue.text;
+}
+dlg.BluePanel.sliderBlue.onChanging = function () {
+    dlg.BluePanel.BlueValue.text = Math.round(dlg.BluePanel.sliderBlue.value * 10)/10;
+
+    color_BlueChannelRoughness.brightness = Math.round(dlg.BluePanel.sliderBlue.value * 10)/10;
+}
+
 dlg.btnRun = dlg.add("button", undefined, "Run");
 dlg.btnRun.onClick = function() {
     color_RedChannelMetallic.brightness = Math.round(dlg.RedPanel.sliderRed.value * 10)/10;
     color_GreenChannelRoughness.brightness = Math.round(dlg.GreenPanel.sliderGreen.value * 10)/10;
+    color_BlueChannelRoughness.brightness = Math.round(dlg.BluePanel.sliderGreen.value * 10)/10;
 
     var customSpecMapLayerSet = app.activeDocument.layerSets[FN_CustomSpecMap];
     var redChannelMetallicLayerSet = customSpecMapLayerSet.layerSets.getByName(FN_CSM_RedChannelMetallic);
     var greenChannelRoughnessLayerSet = customSpecMapLayerSet.layerSets.getByName(FN_CSM_GreenChannelRoughness);
+    var blueChannelClearcoatLayerSet = customSpecMapLayerSet.layerSets.getByName(FN_CSM_BlueChannelClearcoat);
 
     var newRedChannelLayer = redChannelMetallicLayerSet.artLayers.add();
     app.activeDocument.activeLayer = newRedChannelLayer;
@@ -91,6 +118,10 @@ dlg.btnRun.onClick = function() {
     var newGreenChannelLayer = greenChannelRoughnessLayerSet.artLayers.add();
     app.activeDocument.activeLayer = newGreenChannelLayer;
     app.activeDocument.selection.fill(color_GreenChannelRoughness);   
+
+    var newBlueChannelLayer = blueChannelClearcoatLayerSet.artLayers.add();
+    app.activeDocument.activeLayer = newBlueChannelLayer;
+    app.activeDocument.selection.fill(color_BlueChannelRoughness);   
 
     app.activeDocument.selection.deselect();
     this.parent.close(0);
