@@ -1,4 +1,8 @@
-Script Descriptions
+# iRacing Photoshop Scripts
+
+A set of scripts (initially developed for personal use only), that I use in my workflow for creating liveries for iRacing in Photoshop.
+
+## Script Descriptions
 
 * [Add to Spec Map](iRacingAddToSpecMap.jsx)
   * A popup dialog that takes in values for red, green, and blue channel values to add to the Custom Spec Map folders with a trace of the currently selected layers
