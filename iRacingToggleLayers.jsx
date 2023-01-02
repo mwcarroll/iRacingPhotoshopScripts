@@ -60,7 +60,7 @@ for(var i = 0; i < PA_series.length; i++){
 		CSM_GCR_series = getAllChildren(CSM_GCR_seriesFolder, CSM_GCR_series);
 
 		CSM_BCC_series = [];
-		CSM_BCC_series = getAllChildren(CSM_GCR_seriesFolder, CSM_BCC_series);
+		CSM_BCC_series = getAllChildren(CSM_BCC_seriesFolder, CSM_BCC_series);
 
 		var layersToManipulate = [].concat(PA_series, CSM_RCM_series, CSM_GCR_series, CSM_BCC_series);
 
