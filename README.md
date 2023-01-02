@@ -11,3 +11,6 @@ A set of scripts (initially developed for personal use only), that I use in my w
 * [Toggle Layers](iRacingToggleLayers.jsx)
   * A popup dialog, with values populated from folder names inside of `Paintable Area\Stickers\Series`, that automatically shows/hides folders inside `Custom Spec Map\[Channel]\Stickers\Series` and `Paintable Area\Stickers\Series`, with the assumption that they will match
   * Only the selected "series" folder will remain visible (in both the Paintable Area and Custom Spec Map)
+  * Example folder structure:
+  
+    ![image](https://user-images.githubusercontent.com/164166/210220366-d06f7c69-57be-4048-93ee-ca4590c106f8.png)
