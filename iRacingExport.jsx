@@ -62,7 +62,7 @@ infoVisible = infoLayer != undefined ? infoLayer.visible : false;
 
 // save spec layer
 if(!isHelmet && !isSuit){
-    if(paintablelayer != undefined) paintableLayer.visible = false;
+    if(paintableLayer != undefined) paintableLayer.visible = false;
     if(infoLayer != undefined) infoLayer.visible = false;
     if(specLayer != undefined) specLayer.visible = true;
 
