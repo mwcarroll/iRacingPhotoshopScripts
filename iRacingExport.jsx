@@ -84,6 +84,6 @@ if(specLayer != undefined) specLayer.visible = specVisible;
 function saveTarga(filePath) {
     targaSaveOptions = new TargaSaveOptions();
     targaSaveOptions.alphaChannels = true;
-    targaSaveOptions.resolution = TargaBitsPerPixels.THIRTYTWO;
+    targaSaveOptions.resolution = (!isHelmet && !isSuit) ? TargaBitsPerPixels.THIRTYTWO : TargaBitsPerPixels.SIXTEEN;
     app.activeDocument.saveAs(File(filePath), targaSaveOptions, true, Extension.LOWERCASE);
 };
